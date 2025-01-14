@@ -1,0 +1,174 @@
+﻿@model IEnumerable<MVC_Task.Models.EmployeeModel>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+@{
+    ViewBag.Title = "Index";
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "AddEmployee")
+    @Html.ActionLink("DeletedItems", "DeletedData")
+</p>
+<table class="table" id="studentsTable">
+    <tr>
+        <th>
+            SR.No
+            @{
+                int count = 1;
+            }
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EmployeeID)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Department)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DOB)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Age)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Gender)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Phone)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EAddres)
+        </th>
+        <th>
+            Action
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @count
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EmployeeID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.deptName)
+            </td>
+            <td>
+                @item.DOB.ToString("dd-MM-yyyy")
+            </td>
+            <td>
+                @(DateTime.Now.Subtract(item.DOB).Days / 365)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Gender)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EAddres)
+            </td>
+            <td>
+                @Html.ActionLink(" ", "Edit", new { id = item.Eid }, new { @class = "fa fa-edit", @title = "Edit" }) |
+                @Html.ActionLink(" ", "GetElementById", new { id = item.Eid }, new { @class = "fa fa-info-circle", @title = "Details" }) |
+                @Html.ActionLink(" ", "DeleteEmployee", new { id = item.Eid }, new { @class = "fa fa-trash", @title = "Delete" })
+            </td>
+
+        </tr>
+        count++;
+    }
+
+</table>
+<div>
+
+    <ul class="pagination">
+        @if (currentPage > 1)
+        {
+            <li class="page-item">
+                @Html.ActionLink("Previous", "Index", new { page = currentPage - 1 }, new { @class = "btn btn-dark page-link" })
+            </li>
+        }
+
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            <li class="page-item @(i == currentPage ? "active" : "")">
+                @Html.ActionLink(i.ToString(), "Index", new { page = i }, new { @class = "btn btn-dark page-link" })
+            </li>
+        }
+
+        @if (currentPage < totalPages)
+        {
+            <li class="page-item">
+                @Html.ActionLink("Next", "Index", new { page = currentPage + 1 }, new { @class = "btn btn-dark page-link" })
+            </li>
+        }
+    </ul>
+</div>
+
+<div>
+    <button id="btnPrint" class="btn btn-success">Print</button>
+    <button id="btnDownloadExcel" class="btn btn-primary">Download to Excel</button>
+</div>
+
+@section Scripts{
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        $("#btnPrint").click(function () {
+
+            var printWindow = window.open('', '', 'height=400,width=600');
+            printWindow.document.write('<html><head><title>Print</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write('table { width: 100%; border-collapse: collapse; }');
+            printWindow.document.write('th, td { border: 1px solid black; padding: 8px; text-align: left; }');
+            printWindow.document.write('th { background-color: #f2f2f2; }');
+            printWindow.document.write('h2 { text-align: center; }');
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write('<h2>Student List</h2>');
+            printWindow.document.write('<table>' + $('#studentsTable').html() + '</table>');
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        });
+
+        $("#btnDownloadExcel").click(function () {
+            var table = document.getElementById("studentsTable");
+            var rows = table.rows;
+            var csv = [];
+
+
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var cols = row.cells;
+                var rowData = [];
+
+                for (var j = 0; j < cols.length; j++) {
+                    rowData.push(cols[j].innerText);
+                }
+
+                csv.push(rowData.join(","));
+            }
+
+
+            var csvFile = new Blob([csv.join("\n")], { type: 'text/csv' });
+            var downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(csvFile);
+            downloadLink.download = "students.csv";
+            downloadLink.click();
+        });
+    </script>
+}
